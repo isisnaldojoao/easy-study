@@ -172,39 +172,41 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatCard
           title="Disciplinas"
           value={filteredSubjects.length}
-          icon={<BookOpen className="size-3.5" />}
+          icon={<BookOpen className="h-4 w-4" />}
         />
         <StatCard
           title="Pendentes"
           value={pending.length + pendingSessions.length}
-          icon={<ClipboardList className="size-3.5" />}
+          icon={<ClipboardList className="h-4 w-4" />}
         />
         <StatCard
-          title="Provas 14d"
+          title="Provas/trabalhos (14d)"
           value={upcomingExams.length}
-          icon={<GraduationCap className="size-3.5" />}
+          icon={<GraduationCap className="h-4 w-4" />}
         />
         <StatCard
           title="Concluídas"
           value={completed.length}
-          icon={<CheckCircle2 className="size-3.5" />}
+          icon={<CheckCircle2 className="h-4 w-4" />}
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Acontecendo hoje</CardTitle>
-            <CardDescription>Atividades e sessões de estudo</CardDescription>
+      <div className="grid gap-3 sm:gap-4 lg:grid-cols-2 lg:gap-6">
+        <Card className="min-w-0 overflow-hidden">
+          <CardHeader className="space-y-0.5 p-3 sm:p-4">
+            <CardTitle className="text-base sm:text-lg">Acontecendo hoje</CardTitle>
+            <CardDescription className="hidden sm:block">
+              Atividades e sessões de estudo
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2 p-3 pt-0 sm:space-y-3 sm:p-4 sm:pt-0">
             {todayActivities.length === 0 && todaySessions.length === 0 ? (
               <EmptyState
-                className="py-8"
+                className="py-6 sm:py-8"
                 title="Nada para hoje"
                 description="Sem atividades ou sessões agendadas."
               />
@@ -213,16 +215,16 @@ export default function DashboardPage() {
                 {todayActivities.map((a) => (
                   <div
                     key={a.id}
-                    className="flex min-w-0 items-start justify-between gap-2 rounded-xl border border-border px-3 py-2.5"
+                    className="flex min-w-0 items-center gap-2 rounded-lg border border-border px-2.5 py-2"
                   >
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0 flex-1 overflow-hidden">
                       <p className="truncate text-sm font-medium">{a.title}</p>
-                      <p className="truncate text-xs text-muted-foreground">
+                      <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
                         {subjectMap.get(a.subjectId)?.name} · {typeLabel(a.type)}
                         {a.time ? ` · ${a.time}` : ""}
                       </p>
                     </div>
-                    <Badge variant="warning" className="shrink-0">
+                    <Badge variant="warning" className="shrink-0 text-[10px]">
                       Hoje
                     </Badge>
                   </div>
@@ -230,18 +232,18 @@ export default function DashboardPage() {
                 {todaySessions.map((s) => (
                   <div
                     key={s.id}
-                    className="flex min-w-0 items-start justify-between gap-2 rounded-xl border border-border px-3 py-2.5"
+                    className="flex min-w-0 items-center gap-2 rounded-lg border border-border px-2.5 py-2"
                   >
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0 flex-1 overflow-hidden">
                       <p className="truncate text-sm font-medium">{s.title}</p>
-                      <p className="truncate text-xs text-muted-foreground">
+                      <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
                         Estudo · {subjectMap.get(s.subjectId)?.name} ·{" "}
                         {s.startTime}–{s.endTime}
                       </p>
                     </div>
                     <Badge
                       variant={s.status === "concluida" ? "success" : "secondary"}
-                      className="shrink-0"
+                      className="shrink-0 text-[10px]"
                     >
                       {s.status === "concluida" ? "Feita" : "Sessão"}
                     </Badge>
@@ -252,17 +254,19 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Próximos compromissos</CardTitle>
-            <CardDescription>
+        <Card className="min-w-0 overflow-hidden">
+          <CardHeader className="space-y-0.5 p-3 sm:p-4">
+            <CardTitle className="text-base sm:text-lg">
+              Próximos compromissos
+            </CardTitle>
+            <CardDescription className="hidden sm:block">
               Atividades e sessões de estudo pendentes
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2 p-3 pt-0 sm:space-y-3 sm:p-4 sm:pt-0">
             {upcoming.length === 0 ? (
               <EmptyState
-                className="py-8"
+                className="py-6 sm:py-8"
                 title="Nenhum compromisso"
                 description="Cadastre atividades na disciplina ou sessões no planejamento."
               />
@@ -272,11 +276,11 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={`${item.kind}-${item.id}`}
-                    className="flex min-w-0 items-start justify-between gap-2 rounded-xl border border-border px-3 py-2.5"
+                    className="flex min-w-0 items-center gap-2 rounded-lg border border-border px-2.5 py-2"
                   >
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0 flex-1 overflow-hidden">
                       <p className="truncate text-sm font-medium">{item.title}</p>
-                      <p className="truncate text-xs text-muted-foreground">
+                      <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
                         {subjectMap.get(item.subjectId)?.name} · {item.label} ·{" "}
                         {formatDisplayDate(item.date)}
                         {item.time ? ` · ${item.time}` : ""}
@@ -287,7 +291,7 @@ export default function DashboardPage() {
                     </div>
                     <Badge
                       variant={urgencyBadgeVariant(bucket)}
-                      className="shrink-0"
+                      className="shrink-0 text-[10px]"
                     >
                       {urgencyLabels[bucket]}
                     </Badge>
@@ -299,15 +303,17 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Minha rotina</CardTitle>
-          <CardDescription>Sessões de estudo de hoje</CardDescription>
+      <Card className="min-w-0 overflow-hidden">
+        <CardHeader className="space-y-0.5 p-3 sm:p-4">
+          <CardTitle className="text-base sm:text-lg">Minha rotina</CardTitle>
+          <CardDescription className="hidden sm:block">
+            Sessões de estudo de hoje
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2 p-3 pt-0 sm:space-y-3 sm:p-4 sm:pt-0">
           {todaySessions.length === 0 ? (
             <EmptyState
-              className="py-8"
+              className="py-6 sm:py-8"
               title="Sem rotina hoje"
               description="Planeje sessões em Meu planejamento."
               action={
@@ -323,7 +329,7 @@ export default function DashboardPage() {
             todaySessions.map((s) => (
               <label
                 key={s.id}
-                className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5"
+                className="flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border border-border px-2.5 py-2"
               >
                 <Checkbox
                   checked={s.status === "concluida"}
@@ -331,9 +337,9 @@ export default function DashboardPage() {
                     void toggleSession(s.id, checked === true)
                   }
                 />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium">{s.title}</p>
-                  <p className="text-xs text-muted-foreground">
+                <div className="min-w-0 flex-1 overflow-hidden">
+                  <p className="truncate text-sm font-medium">{s.title}</p>
+                  <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
                     {subjectMap.get(s.subjectId)?.name} · {s.startTime}–{s.endTime}
                   </p>
                 </div>
@@ -460,17 +466,17 @@ function StatCard({
   icon: React.ReactNode;
 }) {
   return (
-    <Card className="min-w-0 shadow-none">
-      <CardContent className="flex items-center gap-2 p-3">
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground">
+    <Card>
+      <CardContent className="flex items-center gap-3 p-4 sm:p-5">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-accent text-accent-foreground sm:h-11 sm:w-11">
           {icon}
-        </span>
-        <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground sm:text-sm">
-          {title}
-        </span>
-        <span className="shrink-0 text-sm font-semibold tabular-nums leading-none sm:text-base">
-          {value}
-        </span>
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-xs font-medium text-muted-foreground">
+            {title}
+          </p>
+          <p className="text-2xl font-semibold tracking-tight">{value}</p>
+        </div>
       </CardContent>
     </Card>
   );
