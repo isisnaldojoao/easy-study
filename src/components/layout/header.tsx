@@ -68,29 +68,29 @@ export function Header({ onMenuClick, search, onSearchChange }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border/70 bg-background/80 backdrop-blur-xl">
-      <div className="flex flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
+      <div className="flex flex-col gap-2 px-3 py-2.5 sm:gap-3 sm:px-6 sm:py-4 lg:px-8">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
-              className="mt-0.5 lg:hidden"
+              className="h-9 w-9 shrink-0 lg:hidden"
               onClick={onMenuClick}
               aria-label="Abrir menu"
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <div>
-              <h1 className="font-[family-name:var(--font-fraunces)] text-2xl tracking-tight text-foreground">
+            <div className="min-w-0">
+              <h1 className="truncate font-[family-name:var(--font-fraunces)] text-base tracking-tight text-foreground sm:text-2xl">
                 {greeting}, {firstName}
               </h1>
-              <p className="mt-1 text-sm capitalize text-muted-foreground">
+              <p className="mt-0.5 hidden text-sm capitalize text-muted-foreground sm:block">
                 {formatLongDate(todayISO())}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-2">
             <div className="relative hidden md:block">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -103,10 +103,15 @@ export function Header({ onMenuClick, search, onSearchChange }: HeaderProps) {
 
             <DropdownMenu open={openNotifs} onOpenChange={setOpenNotifs}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative" aria-label="Notificações">
-                  <Bell className="h-5 w-5" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative h-9 w-9"
+                  aria-label="Notificações"
+                >
+                  <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                   {unread > 0 && (
-                    <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+                    <span className="absolute right-1 top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold text-primary-foreground">
                       {unread > 9 ? "9+" : unread}
                     </span>
                   )}
@@ -138,7 +143,8 @@ export function Header({ onMenuClick, search, onSearchChange }: HeaderProps) {
                         key={n.id}
                         className="flex cursor-pointer flex-col items-start gap-1 py-3"
                         onClick={() => {
-                          if (user && !n.read) void markNotificationRead(n.id, user.id);
+                          if (user && !n.read)
+                            void markNotificationRead(n.id, user.id);
                         }}
                       >
                         <div className="flex w-full items-center justify-between gap-2">
@@ -147,7 +153,9 @@ export function Header({ onMenuClick, search, onSearchChange }: HeaderProps) {
                             <span className="h-2 w-2 rounded-full bg-primary" />
                           )}
                         </div>
-                        <span className="text-xs text-muted-foreground">{n.message}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {n.message}
+                        </span>
                       </DropdownMenuItem>
                     ))
                   )}
@@ -158,17 +166,18 @@ export function Header({ onMenuClick, search, onSearchChange }: HeaderProps) {
             <Button
               variant="ghost"
               size="icon"
+              className="h-9 w-9"
               aria-label="Alternar tema"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             >
-              <Sun className="h-5 w-5 dark:hidden" />
-              <Moon className="hidden h-5 w-5 dark:block" />
+              <Sun className="h-4 w-4 dark:hidden sm:h-5 sm:w-5" />
+              <Moon className="hidden h-4 w-4 dark:block sm:h-5 sm:w-5" />
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-2 px-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
+                <Button variant="ghost" className="h-9 gap-2 px-1.5 sm:px-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-[10px] font-semibold text-primary sm:h-8 sm:w-8 sm:text-xs">
                     {initials(user?.name ?? "U")}
                   </span>
                   <span className="hidden max-w-[120px] truncate text-sm sm:inline">
@@ -210,12 +219,12 @@ export function Header({ onMenuClick, search, onSearchChange }: HeaderProps) {
         </div>
 
         <div className="relative md:hidden">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Buscar..."
-            className="pl-9"
+            className="h-9 pl-8 text-sm"
           />
         </div>
       </div>

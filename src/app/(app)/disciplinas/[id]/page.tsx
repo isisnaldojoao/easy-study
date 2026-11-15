@@ -5,8 +5,12 @@ import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
   ArrowLeft,
+  BookOpen,
   CalendarDays,
+  ClipboardList,
   FileText,
+  LayoutGrid,
+  Paperclip,
   Pencil,
   Plus,
   StickyNote,
@@ -197,12 +201,12 @@ export default function DisciplinaDetailPage() {
             <ArrowLeft className="h-4 w-4" />
             Disciplinas
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <span
-              className="h-4 w-4 rounded-full"
+              className="h-4 w-4 shrink-0 rounded-full"
               style={{ backgroundColor: subject.color }}
             />
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display truncate text-xl font-semibold tracking-tight sm:text-2xl">
               {subject.name}
             </h1>
           </div>
@@ -218,12 +222,39 @@ export default function DisciplinaDetailPage() {
 
       <Tabs defaultValue="overview">
         <TabsList>
-          <TabsTrigger value="overview">Visão geral</TabsTrigger>
-          <TabsTrigger value="activities">Atividades</TabsTrigger>
-          <TabsTrigger value="calendar">Calendário</TabsTrigger>
-          <TabsTrigger value="contents">Conteúdos</TabsTrigger>
-          <TabsTrigger value="materials">Materiais</TabsTrigger>
-          <TabsTrigger value="notes">Anotações</TabsTrigger>
+          <TabsTrigger value="overview">
+            <LayoutGrid className="h-3.5 w-3.5" />
+            Geral
+          </TabsTrigger>
+          <TabsTrigger value="activities">
+            <ClipboardList className="h-3.5 w-3.5" />
+            Atividades
+            <span className="rounded-md bg-foreground/10 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums">
+              {subjectActivities.length}
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="calendar">
+            <CalendarDays className="h-3.5 w-3.5" />
+            Agenda
+          </TabsTrigger>
+          <TabsTrigger value="contents">
+            <BookOpen className="h-3.5 w-3.5" />
+            Conteúdos
+            <span className="rounded-md bg-foreground/10 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums">
+              {reviews.length}
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="materials">
+            <Paperclip className="h-3.5 w-3.5" />
+            Materiais
+            <span className="rounded-md bg-foreground/10 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums">
+              {materials.length}
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="notes">
+            <StickyNote className="h-3.5 w-3.5" />
+            Notas
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">

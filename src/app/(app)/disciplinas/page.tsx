@@ -74,18 +74,19 @@ export default function DisciplinasPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 animate-fade-up">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="font-display text-xl font-semibold tracking-tight sm:text-2xl">
             Minhas disciplinas
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-0.5 hidden text-sm text-muted-foreground sm:block">
             Cadastre e organize suas matérias
           </p>
         </div>
-        <Button onClick={openCreate}>
+        <Button size="sm" className="shrink-0 sm:h-10 sm:px-4" onClick={openCreate}>
           <Plus className="h-4 w-4" />
-          Nova disciplina
+          <span className="sm:hidden">Nova</span>
+          <span className="hidden sm:inline">Nova disciplina</span>
         </Button>
       </div>
 
@@ -108,7 +109,7 @@ export default function DisciplinasPage() {
           }
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
           {filtered.map((subject) => {
             const acts = activities.filter((a) => a.subjectId === subject.id);
             const done = acts.filter((a) => a.status === "concluido").length;
@@ -117,52 +118,95 @@ export default function DisciplinasPage() {
 
             return (
               <Card key={subject.id} className="flex flex-col">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <Link
-                      href={`/disciplinas/${subject.id}`}
-                      className="min-w-0 flex-1"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="h-3 w-3 rounded-full"
-                          style={{ backgroundColor: subject.color }}
-                        />
-                        <CardTitle className="truncate text-base hover:text-primary">
-                          {subject.name}
-                        </CardTitle>
-                      </div>
-                      <CardDescription className="mt-2 line-clamp-2">
-                        {subject.description || "Sem descrição"}
-                      </CardDescription>
-                    </Link>
-                    <div className="flex shrink-0 gap-1">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        aria-label="Editar"
-                        onClick={() => openEdit(subject)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        aria-label="Excluir"
-                        onClick={() => setDeleting(subject)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                {/* Mobile row */}
+                <CardContent className="flex items-center gap-2 p-3 sm:hidden">
+                  <Link
+                    href={`/disciplinas/${subject.id}`}
+                    className="flex min-w-0 flex-1 items-center gap-2.5"
+                  >
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: subject.color }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">
+                        {subject.name}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {acts.length} ativ. · {progress}%
+                      </p>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="mt-auto space-y-2">
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{acts.length} atividades</span>
-                    <span>{progress}%</span>
-                  </div>
-                  <Progress value={progress} />
+                    <Progress value={progress} className="h-1.5 w-10 shrink-0" />
+                  </Link>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 shrink-0"
+                    aria-label="Editar"
+                    onClick={() => openEdit(subject)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 shrink-0"
+                    aria-label="Excluir"
+                    onClick={() => setDeleting(subject)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </Button>
                 </CardContent>
+
+                {/* Desktop */}
+                <div className="hidden flex-1 flex-col sm:flex">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <Link
+                        href={`/disciplinas/${subject.id}`}
+                        className="min-w-0 flex-1"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="h-3 w-3 rounded-full"
+                            style={{ backgroundColor: subject.color }}
+                          />
+                          <CardTitle className="truncate text-base hover:text-primary">
+                            {subject.name}
+                          </CardTitle>
+                        </div>
+                        <CardDescription className="mt-2 line-clamp-2">
+                          {subject.description || "Sem descrição"}
+                        </CardDescription>
+                      </Link>
+                      <div className="flex shrink-0 gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          aria-label="Editar"
+                          onClick={() => openEdit(subject)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          aria-label="Excluir"
+                          onClick={() => setDeleting(subject)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="mt-auto space-y-2">
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>{acts.length} atividades</span>
+                      <span>{progress}%</span>
+                    </div>
+                    <Progress value={progress} />
+                  </CardContent>
+                </div>
               </Card>
             );
           })}

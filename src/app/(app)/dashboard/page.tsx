@@ -163,7 +163,7 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 animate-fade-up">
-      <div>
+      <div className="hidden sm:block">
         <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
           Olá, {user?.name?.split(" ")[0] ?? "estudante"}
         </h1>
@@ -172,26 +172,26 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
         <StatCard
           title="Disciplinas"
           value={filteredSubjects.length}
-          icon={<BookOpen className="h-4 w-4" />}
+          icon={<BookOpen className="h-3.5 w-3.5" />}
         />
         <StatCard
           title="Pendentes"
           value={pending.length + pendingSessions.length}
-          icon={<ClipboardList className="h-4 w-4" />}
+          icon={<ClipboardList className="h-3.5 w-3.5" />}
         />
         <StatCard
-          title="Provas/trabalhos (14d)"
+          title="Provas (14d)"
           value={upcomingExams.length}
-          icon={<GraduationCap className="h-4 w-4" />}
+          icon={<GraduationCap className="h-3.5 w-3.5" />}
         />
         <StatCard
           title="Concluídas"
           value={completed.length}
-          icon={<CheckCircle2 className="h-4 w-4" />}
+          icon={<CheckCircle2 className="h-3.5 w-3.5" />}
         />
       </div>
 
@@ -338,8 +338,8 @@ export default function DashboardPage() {
       </Card>
 
       <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Minhas disciplinas</h2>
+        <div className="mb-2 flex items-center justify-between sm:mb-3">
+          <h2 className="text-base font-semibold sm:text-lg">Minhas disciplinas</h2>
           <Link
             href="/disciplinas"
             className="text-sm font-medium text-primary hover:underline"
@@ -361,7 +361,7 @@ export default function DashboardPage() {
             }
           />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-2 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
             {filteredSubjects.map((subject) => {
               const subjectActs = activities.filter(
                 (a) => a.subjectId === subject.id
@@ -380,7 +380,30 @@ export default function DashboardPage() {
 
               return (
                 <Link key={subject.id} href={`/disciplinas/${subject.id}`}>
-                  <Card className="h-full transition hover:border-primary/40">
+                  {/* Mobile: compact row */}
+                  <Card className="transition hover:border-primary/40 sm:hidden">
+                    <CardContent className="flex items-center gap-3 p-3">
+                      <span
+                        className="h-2.5 w-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: subject.color }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">
+                          {subject.name}
+                        </p>
+                        <p className="truncate text-[11px] text-muted-foreground">
+                          {total} ativ. · {progress}%
+                          {nextExam
+                            ? ` · ${formatDisplayDate(nextExam.date)}`
+                            : ""}
+                        </p>
+                      </div>
+                      <Progress value={progress} className="h-1.5 w-12 shrink-0" />
+                    </CardContent>
+                  </Card>
+
+                  {/* Desktop / tablet */}
+                  <Card className="hidden h-full transition hover:border-primary/40 sm:block">
                     <CardHeader className="pb-3">
                       <div className="flex items-start gap-3">
                         <span
@@ -430,14 +453,16 @@ function StatCard({
 }) {
   return (
     <Card>
-      <CardContent className="flex items-center gap-4 p-5">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
+      <CardContent className="flex items-center gap-2 p-3 sm:gap-3 sm:p-4">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground sm:h-10 sm:w-10 sm:rounded-xl">
           {icon}
         </div>
-        <div>
-          <p className="text-xs font-medium text-muted-foreground">{title}</p>
-          <p className="text-2xl font-semibold tracking-tight">{value}</p>
-        </div>
+        <p className="min-w-0 flex-1 truncate text-xs font-medium text-muted-foreground sm:text-sm">
+          {title}
+        </p>
+        <p className="shrink-0 text-lg font-semibold tracking-tight sm:text-xl">
+          {value}
+        </p>
       </CardContent>
     </Card>
   );
