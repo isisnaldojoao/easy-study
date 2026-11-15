@@ -172,26 +172,26 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Disciplinas"
           value={filteredSubjects.length}
-          icon={<BookOpen className="h-3.5 w-3.5" />}
+          icon={<BookOpen className="size-3.5" />}
         />
         <StatCard
           title="Pendentes"
           value={pending.length + pendingSessions.length}
-          icon={<ClipboardList className="h-3.5 w-3.5" />}
+          icon={<ClipboardList className="size-3.5" />}
         />
         <StatCard
           title="Provas 14d"
           value={upcomingExams.length}
-          icon={<GraduationCap className="h-3.5 w-3.5" />}
+          icon={<GraduationCap className="size-3.5" />}
         />
         <StatCard
           title="Concluídas"
           value={completed.length}
-          icon={<CheckCircle2 className="h-3.5 w-3.5" />}
+          icon={<CheckCircle2 className="size-3.5" />}
         />
       </div>
 
@@ -387,24 +387,24 @@ export default function DashboardPage() {
               return (
                 <Link key={subject.id} href={`/disciplinas/${subject.id}`}>
                   {/* Mobile: compact row */}
-                  <Card className="min-w-0 overflow-hidden transition hover:border-primary/40 sm:hidden">
-                    <CardContent className="flex items-center gap-2.5 p-2.5">
+                  <Card className="min-w-0 shadow-none transition hover:border-primary/40 sm:hidden">
+                    <CardContent className="flex items-center gap-2 p-3">
                       <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full"
+                        className="size-2.5 shrink-0 rounded-full"
                         style={{ backgroundColor: subject.color }}
                       />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">
+                      <div className="min-w-0 flex-1 overflow-hidden">
+                        <p className="truncate text-sm font-medium leading-tight">
                           {subject.name}
                         </p>
                         <p className="truncate text-[11px] text-muted-foreground">
-                          {total} ativ. · {progress}%
+                          {total} ativ.
                           {nextExam
                             ? ` · ${formatDisplayDate(nextExam.date)}`
                             : ""}
                         </p>
                       </div>
-                      <span className="shrink-0 text-xs font-semibold tabular-nums text-muted-foreground">
+                      <span className="shrink-0 text-sm font-semibold tabular-nums">
                         {progress}%
                       </span>
                     </CardContent>
@@ -460,19 +460,17 @@ function StatCard({
   icon: React.ReactNode;
 }) {
   return (
-    <Card className="min-w-0 overflow-hidden">
-      <CardContent className="flex flex-col gap-1.5 p-2.5 sm:flex-row sm:items-center sm:gap-3 sm:p-4">
-        <div className="flex items-center gap-1.5 sm:contents">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground sm:h-10 sm:w-10 sm:rounded-xl">
-            {icon}
-          </div>
-          <p className="min-w-0 truncate text-[11px] font-medium text-muted-foreground sm:flex-1 sm:text-sm">
-            {title}
-          </p>
-        </div>
-        <p className="text-xl font-semibold tracking-tight tabular-nums sm:ml-auto sm:text-xl">
+    <Card className="min-w-0 shadow-none">
+      <CardContent className="flex items-center gap-2 p-3">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground">
+          {icon}
+        </span>
+        <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground sm:text-sm">
+          {title}
+        </span>
+        <span className="shrink-0 text-sm font-semibold tabular-nums leading-none sm:text-base">
           {value}
-        </p>
+        </span>
       </CardContent>
     </Card>
   );

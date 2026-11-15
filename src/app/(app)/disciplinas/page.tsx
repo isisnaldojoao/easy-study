@@ -119,17 +119,17 @@ export default function DisciplinasPage() {
             return (
               <Card key={subject.id} className="flex flex-col">
                 {/* Mobile row */}
-                <CardContent className="flex min-w-0 items-center gap-1.5 p-2.5 sm:hidden">
+                <CardContent className="flex min-w-0 items-center gap-1 p-3 sm:hidden">
                   <Link
                     href={`/disciplinas/${subject.id}`}
                     className="flex min-w-0 flex-1 items-center gap-2"
                   >
                     <span
-                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      className="size-2.5 shrink-0 rounded-full"
                       style={{ backgroundColor: subject.color }}
                     />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
+                    <div className="min-w-0 flex-1 overflow-hidden">
+                      <p className="truncate text-sm font-medium leading-tight">
                         {subject.name}
                       </p>
                       <p className="truncate text-[11px] text-muted-foreground">
@@ -140,20 +140,20 @@ export default function DisciplinasPage() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 shrink-0"
+                    className="size-8 shrink-0"
                     aria-label="Editar"
                     onClick={() => openEdit(subject)}
                   >
-                    <Pencil className="h-3.5 w-3.5" />
+                    <Pencil className="size-3.5" />
                   </Button>
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 shrink-0"
+                    className="size-8 shrink-0"
                     aria-label="Excluir"
                     onClick={() => setDeleting(subject)}
                   >
-                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    <Trash2 className="size-3.5 text-destructive" />
                   </Button>
                 </CardContent>
 
