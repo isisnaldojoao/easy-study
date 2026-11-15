@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Easy Study
 
-## Getting Started
+Plataforma local de organização acadêmica — disciplinas, atividades, calendário, planejamento, revisão, materiais e relatórios.
 
-First, run the development server:
+Nesta versão os dados ficam **no navegador** (IndexedDB via Dexie). Ideal para validar o produto localmente e evoluir depois para PWA offline.
+
+## Stack
+
+- Next.js (App Router) + TypeScript
+- Tailwind CSS + componentes no estilo shadcn/ui
+- Dexie (IndexedDB)
+- React Hook Form + Zod
+- FullCalendar
+- TipTap (editor de revisão)
+- Recharts
+
+## Como rodar
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Crie uma conta em **Cadastro**
+2. Cadastre disciplinas e atividades
+3. Use o calendário, planejamento e central de revisão
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Persistência
 
-## Learn More
+| Dado | Onde |
+|------|------|
+| Sessão autenticada | `localStorage` (`studyflow.session`) |
+| Usuários, disciplinas, atividades, etc. | IndexedDB (`studyflow`) |
+| Arquivos de materiais | Blobs no IndexedDB |
 
-To learn more about Next.js, take a look at the following resources:
+Limpar dados do site no navegador apaga a conta e todo o conteúdo.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `npm run dev` — desenvolvimento
+- `npm run build` — build de produção
+- `npm start` — servir build
+- `npm run lint` — ESLint
 
-## Deploy on Vercel
+## Estrutura
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+  app/(auth)/          # login, cadastro, recuperar senha
+  app/(app)/           # área autenticada
+  components/          # UI, layout, formulários
+  hooks/               # live queries Dexie
+  lib/                 # db, datas, crypto, constants
+  providers/           # auth + tema
+  schemas/             # Zod
+  services/            # regras de negócio / CRUD
+  types/
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## PWA (após subir na Vercel)
+
+O app já tem **manifest**, **ícones** e **service worker** (Serwist).
+
+1. Faça o deploy na Vercel (`git push` ou import do repo).
+2. Abra o site em **HTTPS** (a Vercel já entrega isso).
+3. No celular/desktop:
+   - **Chrome/Edge (Android/Desktop):** menu → *Instalar app* / ícone de instalação na barra de endereço.
+   - **Safari (iOS):** Compartilhar → *Adicionar à Tela de Início*.
+4. Confirme em DevTools → Application → Manifest / Service Workers que `/serwist/sw.js` está ativo.
+
+Dados continuam locais (IndexedDB). Offline serve a página `/~offline` quando a rede cair.
+
+## Observações
+
+- Fuso horário de referência: `America/Sao_Paulo`
+- Notificações internas com deduplicação
+- Push do navegador preparado nas configurações

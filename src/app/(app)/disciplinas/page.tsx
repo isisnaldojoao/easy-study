@@ -1,0 +1,199 @@
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { BookOpen, Pencil, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { SubjectFormDialog } from "@/components/subjects/subject-form-dialog";
+import { useSearch } from "@/components/layout/search-context";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  EmptyState,
+  Progress,
+} from "@/components/ui";
+import { useActivities, useSubjects } from "@/hooks/use-live-data";
+import { matchesSearch } from "@/lib/urgency";
+import { useAuth } from "@/providers/auth-provider";
+import { deleteSubject } from "@/services/subjects";
+import type { Subject } from "@/types";
+
+export default function DisciplinasPage() {
+  const { user } = useAuth();
+  const { search } = useSearch();
+  const subjects = useSubjects();
+  const activities = useActivities();
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Subject | null>(null);
+  const [deleting, setDeleting] = useState<Subject | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const filtered = useMemo(
+    () =>
+      subjects.filter((s) =>
+        matchesSearch(`${s.name} ${s.description}`, search)
+      ),
+    [subjects, search]
+  );
+
+  function openCreate() {
+    setEditing(null);
+    setFormOpen(true);
+  }
+
+  function openEdit(subject: Subject) {
+    setEditing(subject);
+    setFormOpen(true);
+  }
+
+  async function confirmDelete() {
+    if (!user || !deleting) return;
+    setBusy(true);
+    try {
+      await deleteSubject(deleting.id, user.id);
+      toast.success("Disciplina excluída.");
+      setDeleting(null);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Não foi possível excluir."
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mx-auto max-w-6xl space-y-6 animate-fade-up">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">
+            Minhas disciplinas
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Cadastre e organize suas matérias
+          </p>
+        </div>
+        <Button onClick={openCreate}>
+          <Plus className="h-4 w-4" />
+          Nova disciplina
+        </Button>
+      </div>
+
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={<BookOpen className="h-5 w-5" />}
+          title="Nenhuma disciplina encontrada"
+          description={
+            search
+              ? "Tente outro termo de busca."
+              : "Crie sua primeira disciplina para começar."
+          }
+          action={
+            !search ? (
+              <Button onClick={openCreate}>
+                <Plus className="h-4 w-4" />
+                Criar disciplina
+              </Button>
+            ) : undefined
+          }
+        />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((subject) => {
+            const acts = activities.filter((a) => a.subjectId === subject.id);
+            const done = acts.filter((a) => a.status === "concluido").length;
+            const progress =
+              acts.length === 0 ? 0 : Math.round((done / acts.length) * 100);
+
+            return (
+              <Card key={subject.id} className="flex flex-col">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <Link
+                      href={`/disciplinas/${subject.id}`}
+                      className="min-w-0 flex-1"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="h-3 w-3 rounded-full"
+                          style={{ backgroundColor: subject.color }}
+                        />
+                        <CardTitle className="truncate text-base hover:text-primary">
+                          {subject.name}
+                        </CardTitle>
+                      </div>
+                      <CardDescription className="mt-2 line-clamp-2">
+                        {subject.description || "Sem descrição"}
+                      </CardDescription>
+                    </Link>
+                    <div className="flex shrink-0 gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label="Editar"
+                        onClick={() => openEdit(subject)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label="Excluir"
+                        onClick={() => setDeleting(subject)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="mt-auto space-y-2">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{acts.length} atividades</span>
+                    <span>{progress}%</span>
+                  </div>
+                  <Progress value={progress} />
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      <SubjectFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        subject={editing}
+      />
+
+      <Dialog open={Boolean(deleting)} onOpenChange={(o) => !o && setDeleting(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir disciplina?</DialogTitle>
+            <DialogDescription>
+              Isso removerá permanentemente &quot;{deleting?.name}&quot; e todos os
+              dados associados (atividades, sessões, materiais, flashcards).
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleting(null)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" disabled={busy} onClick={() => void confirmDelete()}>
+              {busy ? "Excluindo..." : "Excluir"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

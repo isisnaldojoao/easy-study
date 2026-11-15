@@ -1,10 +1,12 @@
 import type { NextConfig } from "next";
+import path from "path";
+import { withSerwist } from "@serwist/turbopack";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
+    root: path.join(__dirname),
     rules: {
       "*.css": {
         loaders: ["@tailwindcss/turbopack"],
@@ -14,4 +16,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

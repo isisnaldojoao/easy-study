@@ -1,5 +1,6 @@
 {
   "name": "easy-study",
+  "description": "Easy Study — organização acadêmica local",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,17 +10,50 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.22",
+    "@fullcalendar/daygrid": "^6.1.22",
+    "@fullcalendar/interaction": "^6.1.22",
+    "@fullcalendar/list": "^6.1.22",
+    "@fullcalendar/react": "^7.1.5",
+    "@fullcalendar/timegrid": "^6.1.22",
+    "@hookform/resolvers": "^7.0.6",
+    "@tiptap/extension-image": "^3.34.0",
+    "@tiptap/extension-placeholder": "^3.34.0",
+    "@tiptap/extension-task-item": "^3.34.0",
+    "@tiptap/extension-task-list": "^3.34.0",
+    "@tiptap/extension-underline": "^3.34.0",
+    "@tiptap/react": "^3.34.0",
+    "@tiptap/starter-kit": "^3.34.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
+    "dexie": "^4.4.7",
+    "dexie-react-hooks": "^4.4.0",
+    "lucide-react": "^1.73.0",
+    "nanoid": "^5.1.16",
     "next": "16.4.6",
+    "next-themes": "^0.4.6",
+    "radix-ui": "^1.8.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "react-hook-form": "^7.92.0",
+    "recharts": "^3.10.1",
+    "sonner": "^2.0.8",
+    "tailwind-merge": "^3.7.0",
+    "temporal-polyfill": "^1.0.8",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@serwist/turbopack": "^9.5.13",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "esbuild": "^0.28.2",
+    "esbuild-wasm": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "serwist": "^9.5.13",
     "tailwindcss": "4.3.3",
     "typescript": "^5"
   }
