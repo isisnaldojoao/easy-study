@@ -162,7 +162,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 animate-fade-up">
+    <div className="mx-auto max-w-7xl space-y-4 overflow-x-hidden animate-fade-up sm:space-y-6">
       <div className="hidden sm:block">
         <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
           Olá, {user?.name?.split(" ")[0] ?? "estudante"}
@@ -172,7 +172,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
         <StatCard
           title="Disciplinas"
           value={filteredSubjects.length}
@@ -184,7 +184,7 @@ export default function DashboardPage() {
           icon={<ClipboardList className="h-3.5 w-3.5" />}
         />
         <StatCard
-          title="Provas (14d)"
+          title="Provas 14d"
           value={upcomingExams.length}
           icon={<GraduationCap className="h-3.5 w-3.5" />}
         />
@@ -213,32 +213,35 @@ export default function DashboardPage() {
                 {todayActivities.map((a) => (
                   <div
                     key={a.id}
-                    className="flex items-start justify-between gap-3 rounded-xl border border-border px-3 py-2.5"
+                    className="flex min-w-0 items-start justify-between gap-2 rounded-xl border border-border px-3 py-2.5"
                   >
-                    <div>
-                      <p className="text-sm font-medium">{a.title}</p>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{a.title}</p>
+                      <p className="truncate text-xs text-muted-foreground">
                         {subjectMap.get(a.subjectId)?.name} · {typeLabel(a.type)}
                         {a.time ? ` · ${a.time}` : ""}
                       </p>
                     </div>
-                    <Badge variant="warning">Hoje</Badge>
+                    <Badge variant="warning" className="shrink-0">
+                      Hoje
+                    </Badge>
                   </div>
                 ))}
                 {todaySessions.map((s) => (
                   <div
                     key={s.id}
-                    className="flex items-start justify-between gap-3 rounded-xl border border-border px-3 py-2.5"
+                    className="flex min-w-0 items-start justify-between gap-2 rounded-xl border border-border px-3 py-2.5"
                   >
-                    <div>
-                      <p className="text-sm font-medium">{s.title}</p>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{s.title}</p>
+                      <p className="truncate text-xs text-muted-foreground">
                         Estudo · {subjectMap.get(s.subjectId)?.name} ·{" "}
                         {s.startTime}–{s.endTime}
                       </p>
                     </div>
                     <Badge
                       variant={s.status === "concluida" ? "success" : "secondary"}
+                      className="shrink-0"
                     >
                       {s.status === "concluida" ? "Feita" : "Sessão"}
                     </Badge>
@@ -269,11 +272,11 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={`${item.kind}-${item.id}`}
-                    className="flex items-start justify-between gap-3 rounded-xl border border-border px-3 py-2.5"
+                    className="flex min-w-0 items-start justify-between gap-2 rounded-xl border border-border px-3 py-2.5"
                   >
-                    <div>
-                      <p className="text-sm font-medium">{item.title}</p>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{item.title}</p>
+                      <p className="truncate text-xs text-muted-foreground">
                         {subjectMap.get(item.subjectId)?.name} · {item.label} ·{" "}
                         {formatDisplayDate(item.date)}
                         {item.time ? ` · ${item.time}` : ""}
@@ -282,7 +285,10 @@ export default function DashboardPage() {
                           : ""}
                       </p>
                     </div>
-                    <Badge variant={urgencyBadgeVariant(bucket)}>
+                    <Badge
+                      variant={urgencyBadgeVariant(bucket)}
+                      className="shrink-0"
+                    >
                       {urgencyLabels[bucket]}
                     </Badge>
                   </div>
@@ -381,8 +387,8 @@ export default function DashboardPage() {
               return (
                 <Link key={subject.id} href={`/disciplinas/${subject.id}`}>
                   {/* Mobile: compact row */}
-                  <Card className="transition hover:border-primary/40 sm:hidden">
-                    <CardContent className="flex items-center gap-3 p-3">
+                  <Card className="min-w-0 overflow-hidden transition hover:border-primary/40 sm:hidden">
+                    <CardContent className="flex items-center gap-2.5 p-2.5">
                       <span
                         className="h-2.5 w-2.5 shrink-0 rounded-full"
                         style={{ backgroundColor: subject.color }}
@@ -398,7 +404,9 @@ export default function DashboardPage() {
                             : ""}
                         </p>
                       </div>
-                      <Progress value={progress} className="h-1.5 w-12 shrink-0" />
+                      <span className="shrink-0 text-xs font-semibold tabular-nums text-muted-foreground">
+                        {progress}%
+                      </span>
                     </CardContent>
                   </Card>
 
@@ -452,15 +460,17 @@ function StatCard({
   icon: React.ReactNode;
 }) {
   return (
-    <Card>
-      <CardContent className="flex items-center gap-2 p-3 sm:gap-3 sm:p-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground sm:h-10 sm:w-10 sm:rounded-xl">
-          {icon}
+    <Card className="min-w-0 overflow-hidden">
+      <CardContent className="flex flex-col gap-1.5 p-2.5 sm:flex-row sm:items-center sm:gap-3 sm:p-4">
+        <div className="flex items-center gap-1.5 sm:contents">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground sm:h-10 sm:w-10 sm:rounded-xl">
+            {icon}
+          </div>
+          <p className="min-w-0 truncate text-[11px] font-medium text-muted-foreground sm:flex-1 sm:text-sm">
+            {title}
+          </p>
         </div>
-        <p className="min-w-0 flex-1 truncate text-xs font-medium text-muted-foreground sm:text-sm">
-          {title}
-        </p>
-        <p className="shrink-0 text-lg font-semibold tracking-tight sm:text-xl">
+        <p className="text-xl font-semibold tracking-tight tabular-nums sm:ml-auto sm:text-xl">
           {value}
         </p>
       </CardContent>

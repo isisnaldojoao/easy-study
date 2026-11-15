@@ -18,6 +18,7 @@ import { formatLongDate, todayISO } from "@/lib/dates";
 import { initials } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { useNotifications } from "@/hooks/use-live-data";
+import { db } from "@/lib/db";
 import {
   markAllNotificationsRead,
   markNotificationRead,
@@ -117,22 +118,29 @@ export function Header({ onMenuClick, search, onSearchChange }: HeaderProps) {
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <DropdownMenuLabel className="flex items-center justify-between">
-                  <span>Notificações</span>
+              <DropdownMenuContent
+                align="end"
+                sideOffset={8}
+                collisionPadding={12}
+                className="w-[min(20rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)]"
+              >
+                <div className="flex items-center justify-between gap-2 px-2 py-1.5">
+                  <p className="text-sm font-semibold">Notificações</p>
                   {unread > 0 && user && (
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1 text-xs font-normal text-primary"
-                      onClick={() => markAllNotificationsRead(user.id)}
+                    <DropdownMenuItem
+                      className="h-auto px-2 py-1 text-xs text-primary focus:text-primary"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        void markAllNotificationsRead(user.id);
+                      }}
                     >
                       <CheckCheck className="h-3.5 w-3.5" />
                       Marcar todas
-                    </button>
+                    </DropdownMenuItem>
                   )}
-                </DropdownMenuLabel>
+                </div>
                 <DropdownMenuSeparator />
-                <div className="max-h-80 overflow-y-auto">
+                <div className="max-h-[min(20rem,50vh)] overflow-y-auto overscroll-contain">
                   {notifications.length === 0 ? (
                     <p className="px-2 py-6 text-center text-sm text-muted-foreground">
                       Nenhuma notificação por enquanto.
@@ -141,21 +149,46 @@ export function Header({ onMenuClick, search, onSearchChange }: HeaderProps) {
                     notifications.slice(0, 12).map((n) => (
                       <DropdownMenuItem
                         key={n.id}
-                        className="flex cursor-pointer flex-col items-start gap-1 py-3"
-                        onClick={() => {
-                          if (user && !n.read)
-                            void markNotificationRead(n.id, user.id);
+                        className="items-start whitespace-normal py-2.5"
+                        onSelect={() => {
+                          void (async () => {
+                            try {
+                              if (user && !n.read) {
+                                await markNotificationRead(n.id, user.id);
+                              }
+                              if (n.relatedActivityId) {
+                                const activity = await db.activities.get(
+                                  n.relatedActivityId
+                                );
+                                if (activity?.subjectId) {
+                                  router.push(
+                                    `/disciplinas/${activity.subjectId}`
+                                  );
+                                  return;
+                                }
+                              }
+                              if (n.relatedSessionId || n.relatedActivityId) {
+                                router.push("/planejamento");
+                              }
+                            } catch {
+                              // evita quebrar o menu se o IndexedDB falhar
+                            }
+                          })();
                         }}
                       >
-                        <div className="flex w-full items-center justify-between gap-2">
-                          <span className="text-sm font-medium">{n.title}</span>
-                          {!n.read && (
-                            <span className="h-2 w-2 rounded-full bg-primary" />
-                          )}
+                        <div className="min-w-0 flex-1 space-y-0.5">
+                          <div className="flex items-start gap-2">
+                            <span className="min-w-0 flex-1 break-words text-sm font-medium leading-snug">
+                              {n.title}
+                            </span>
+                            {!n.read && (
+                              <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                            )}
+                          </div>
+                          <p className="break-words text-xs leading-snug text-muted-foreground">
+                            {n.message}
+                          </p>
                         </div>
-                        <span className="text-xs text-muted-foreground">
-                          {n.message}
-                        </span>
                       </DropdownMenuItem>
                     ))
                   )}

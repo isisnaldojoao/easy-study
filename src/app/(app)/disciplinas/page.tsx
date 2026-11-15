@@ -119,10 +119,10 @@ export default function DisciplinasPage() {
             return (
               <Card key={subject.id} className="flex flex-col">
                 {/* Mobile row */}
-                <CardContent className="flex items-center gap-2 p-3 sm:hidden">
+                <CardContent className="flex min-w-0 items-center gap-1.5 p-2.5 sm:hidden">
                   <Link
                     href={`/disciplinas/${subject.id}`}
-                    className="flex min-w-0 flex-1 items-center gap-2.5"
+                    className="flex min-w-0 flex-1 items-center gap-2"
                   >
                     <span
                       className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -132,11 +132,10 @@ export default function DisciplinasPage() {
                       <p className="truncate text-sm font-medium">
                         {subject.name}
                       </p>
-                      <p className="text-[11px] text-muted-foreground">
+                      <p className="truncate text-[11px] text-muted-foreground">
                         {acts.length} ativ. · {progress}%
                       </p>
                     </div>
-                    <Progress value={progress} className="h-1.5 w-10 shrink-0" />
                   </Link>
                   <Button
                     size="icon"
