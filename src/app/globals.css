@@ -99,6 +99,8 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 body {
@@ -106,6 +108,8 @@ body {
   color: var(--foreground);
   font-family: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
   min-height: 100vh;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 body::before {

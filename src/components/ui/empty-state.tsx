@@ -20,7 +20,7 @@ function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--border)] bg-[var(--card)] px-6 py-12 text-center",
+        "flex w-full max-w-full min-w-0 flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-[var(--border)] bg-[var(--card)] px-3 py-8 text-center sm:px-6 sm:py-12",
         className
       )}
       {...props}

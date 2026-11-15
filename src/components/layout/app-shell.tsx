@@ -11,18 +11,18 @@ function ShellInner({ children }: { children: React.ReactNode }) {
   const { search, setSearch } = useSearch();
 
   return (
-    <div className="flex min-h-screen overflow-x-hidden bg-background">
+    <div className="flex min-h-dvh w-full max-w-[100vw] overflow-x-clip bg-background">
       <Sidebar
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
       />
-      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+      <div className="flex w-full min-w-0 flex-1 flex-col overflow-x-clip">
         <Header
           onMenuClick={() => setMobileOpen(true)}
           search={search}
           onSearchChange={setSearch}
         />
-        <main className="min-w-0 flex-1 overflow-x-hidden px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <main className="box-border w-full min-w-0 flex-1 overflow-x-clip px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
           {children}
         </main>
       </div>

@@ -162,7 +162,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-4 overflow-x-hidden animate-fade-up sm:space-y-6">
+    <div className="mx-auto w-full max-w-7xl space-y-4 animate-fade-up sm:space-y-6">
       <div className="hidden sm:block">
         <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
           Olá, {user?.name?.split(" ")[0] ?? "estudante"}
@@ -172,7 +172,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 [&>*]:min-w-0 xl:grid-cols-4">
         <StatCard
           title="Disciplinas"
           value={filteredSubjects.length}
@@ -195,8 +195,8 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid gap-3 sm:gap-4 lg:grid-cols-2 lg:gap-6">
-        <Card className="min-w-0 overflow-hidden">
+      <div className="grid w-full gap-3 [&>*]:min-w-0 sm:gap-4 lg:grid-cols-2 lg:gap-6">
+        <Card className="overflow-hidden">
           <CardHeader className="space-y-0.5 p-3 sm:p-4">
             <CardTitle className="text-base sm:text-lg">Acontecendo hoje</CardTitle>
             <CardDescription className="hidden sm:block">
@@ -289,10 +289,7 @@ export default function DashboardPage() {
                           : ""}
                       </p>
                     </div>
-                    <Badge
-                      variant={urgencyBadgeVariant(bucket)}
-                      className="shrink-0 text-[10px]"
-                    >
+                    <Badge variant={urgencyBadgeVariant(bucket)}>
                       {urgencyLabels[bucket]}
                     </Badge>
                   </div>
@@ -373,7 +370,7 @@ export default function DashboardPage() {
             }
           />
         ) : (
-          <div className="grid gap-2 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
+          <div className="grid w-full gap-2 [&>*]:min-w-0 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
             {filteredSubjects.map((subject) => {
               const subjectActs = activities.filter(
                 (a) => a.subjectId === subject.id
@@ -391,10 +388,14 @@ export default function DashboardPage() {
                 .sort((a, b) => a.date.localeCompare(b.date))[0];
 
               return (
-                <Link key={subject.id} href={`/disciplinas/${subject.id}`}>
+                <Link
+                  key={subject.id}
+                  href={`/disciplinas/${subject.id}`}
+                  className="block min-w-0 w-full"
+                >
                   {/* Mobile: compact row */}
-                  <Card className="min-w-0 shadow-none transition hover:border-primary/40 sm:hidden">
-                    <CardContent className="flex items-center gap-2 p-3">
+                  <Card className="overflow-hidden shadow-none transition hover:border-primary/40 sm:hidden">
+                    <CardContent className="flex min-w-0 items-center gap-2 overflow-hidden p-3">
                       <span
                         className="size-2.5 shrink-0 rounded-full"
                         style={{ backgroundColor: subject.color }}

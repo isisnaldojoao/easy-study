@@ -73,7 +73,7 @@ export default function DisciplinasPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 animate-fade-up">
+    <div className="mx-auto w-full max-w-6xl space-y-6 animate-fade-up">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <h1 className="font-display text-xl font-semibold tracking-tight sm:text-2xl">
@@ -109,7 +109,7 @@ export default function DisciplinasPage() {
           }
         />
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+        <div className="grid w-full gap-2 [&>*]:min-w-0 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
           {filtered.map((subject) => {
             const acts = activities.filter((a) => a.subjectId === subject.id);
             const done = acts.filter((a) => a.status === "concluido").length;
@@ -117,12 +117,12 @@ export default function DisciplinasPage() {
               acts.length === 0 ? 0 : Math.round((done / acts.length) * 100);
 
             return (
-              <Card key={subject.id} className="flex flex-col">
+              <Card key={subject.id} className="flex flex-col overflow-hidden">
                 {/* Mobile row */}
-                <CardContent className="flex min-w-0 items-center gap-1 p-3 sm:hidden">
+                <CardContent className="flex w-full min-w-0 items-center gap-1 overflow-hidden p-3 sm:hidden">
                   <Link
                     href={`/disciplinas/${subject.id}`}
-                    className="flex min-w-0 flex-1 items-center gap-2"
+                    className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden"
                   >
                     <span
                       className="size-2.5 shrink-0 rounded-full"

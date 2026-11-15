@@ -65,9 +65,9 @@ export const urgencyLabels: Record<UrgencyBucket, string> = {
   atrasado: "Atrasado",
   hoje: "Hoje",
   amanha: "Amanhã",
-  proximos_3: "Próximos 3 dias",
-  proximos_7: "Próximos 7 dias",
-  mais_7: "Mais de 7 dias",
+  proximos_3: "Em 3d",
+  proximos_7: "Em 7d",
+  mais_7: "+7d",
 };
 
 export function isPastDate(date: string, from = todayISO()) {
