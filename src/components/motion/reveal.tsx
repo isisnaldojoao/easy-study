@@ -43,17 +43,16 @@ export function Reveal({
   }, []);
 
   const shared = {
-    ref: ref as Ref<HTMLElement>,
     className: cn("reveal", className),
     "data-variant": variant,
     style: { "--reveal-delay": `${delay}ms` } as CSSProperties,
     children,
   };
 
-  if (as === "li") return <li {...shared} />;
-  if (as === "article") return <article {...shared} />;
-  if (as === "section") return <section {...shared} />;
-  return <div {...shared} />;
+  if (as === "li") return <li ref={ref as Ref<HTMLLIElement>} {...shared} />;
+  if (as === "article") return <article ref={ref as Ref<HTMLElement>} {...shared} />;
+  if (as === "section") return <section ref={ref as Ref<HTMLElement>} {...shared} />;
+  return <div ref={ref as Ref<HTMLDivElement>} {...shared} />;
 }
 
 export function ScrollProgress() {
