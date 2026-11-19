@@ -1,9 +1,8 @@
-import { nanoid } from "nanoid";
-import { createSalt, hashPassword, verifyPassword } from "@/lib/crypto";
-import { db } from "@/lib/db";
 import { nowISO } from "@/lib/dates";
-import { clearSession, getSession, setSession } from "@/lib/session";
-import type { RegisterInput, ResetPasswordInput } from "@/schemas/auth";
+import { toCamel, toSnake } from "@/lib/records";
+import { getSupabase } from "@/lib/supabase";
+import { notifyDataChange } from "@/lib/data-sync";
+import type { RegisterInput } from "@/schemas/auth";
 import type { Session, User, UserPreferences } from "@/types";
 
 const defaultPreferences: UserPreferences = {
@@ -13,111 +12,149 @@ const defaultPreferences: UserPreferences = {
   browserPushEnabled: false,
 };
 
-export async function registerUser(input: RegisterInput): Promise<Session> {
-  const email = input.email.trim().toLowerCase();
-  const existing = await db.users.where("email").equals(email).first();
-  if (existing) {
-    throw new Error("Já existe uma conta com este e-mail.");
+export const EMAIL_NOT_CONFIRMED_MESSAGE = "Confirme o e-mail antes de entrar.";
+
+function authError(message: string) {
+  const known: Record<string, string> = {
+    "Invalid login credentials": "E-mail ou senha inválidos.",
+    "User already registered": "Já existe uma conta com este e-mail.",
+    "Email not confirmed": EMAIL_NOT_CONFIRMED_MESSAGE,
+  };
+  return known[message] ?? message;
+}
+
+export type RegisterResult =
+  | { status: "signed_in"; session: Session }
+  | { status: "confirm_email"; email: string };
+
+async function profileFor(userId: string, email: string, nameHint?: string): Promise<User> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+
+  if (!data) {
+    const created = {
+      id: userId,
+      name: nameHint?.trim() || email.split("@")[0] || "Estudante",
+      preferences: defaultPreferences,
+      createdAt: nowISO(),
+    };
+    const { error: insertError } = await supabase.from("profiles").insert(toSnake(created));
+    if (insertError) throw new Error(insertError.message);
+    return {
+      ...created,
+      email,
+      passwordHash: "",
+      salt: "",
+    };
   }
 
-  const salt = createSalt();
-  const passwordHash = await hashPassword(input.password, salt);
-  const user: User = {
-    id: nanoid(),
-    name: input.name.trim(),
-    email,
-    passwordHash,
-    salt,
-    createdAt: nowISO(),
-    preferences: defaultPreferences,
-  };
+  const profile = toCamel<{
+    id: string;
+    name: string;
+    preferences?: UserPreferences;
+    createdAt?: string;
+  }>(data as Record<string, unknown>);
 
-  await db.users.add(user);
-  const session: Session = {
+  return {
+    id: profile.id,
+    name: profile.name,
+    email,
+    passwordHash: "",
+    salt: "",
+    createdAt: profile.createdAt ?? nowISO(),
+    preferences: profile.preferences ?? defaultPreferences,
+  };
+}
+
+function toSession(user: User): Session {
+  return {
     userId: user.id,
     email: user.email,
     name: user.name,
     loggedAt: nowISO(),
   };
-  setSession(session);
-  return session;
+}
+
+export async function registerUser(input: RegisterInput): Promise<RegisterResult> {
+  const email = input.email.trim().toLowerCase();
+  const { data, error } = await getSupabase().auth.signUp({
+    email,
+    password: input.password,
+    options: { data: { name: input.name.trim() } },
+  });
+  if (error) throw new Error(authError(error.message));
+  if (!data.user) throw new Error("Não foi possível criar a conta.");
+  if (!data.session) {
+    return { status: "confirm_email", email };
+  }
+  const user = await profileFor(data.user.id, email, input.name);
+  return { status: "signed_in", session: toSession(user) };
 }
 
 export async function loginUser(email: string, password: string): Promise<Session> {
   const normalized = email.trim().toLowerCase();
-  const user = await db.users.where("email").equals(normalized).first();
-  if (!user) {
-    throw new Error("E-mail ou senha inválidos.");
+  const { data, error } = await getSupabase().auth.signInWithPassword({
+    email: normalized,
+    password,
+  });
+  if (error || !data.user) {
+    throw new Error(authError(error?.message ?? "E-mail ou senha inválidos."));
   }
-
-  const valid = await verifyPassword(password, user.salt, user.passwordHash);
-  if (!valid) {
-    throw new Error("E-mail ou senha inválidos.");
-  }
-
-  const session: Session = {
-    userId: user.id,
-    email: user.email,
-    name: user.name,
-    loggedAt: nowISO(),
-  };
-  setSession(session);
-  return session;
+  const user = await profileFor(data.user.id, normalized);
+  return toSession(user);
 }
 
-export async function resetPassword(input: ResetPasswordInput) {
-  const email = input.email.trim().toLowerCase();
-  const user = await db.users.where("email").equals(email).first();
-  if (!user) {
-    throw new Error("Não encontramos uma conta com este e-mail.");
-  }
-
-  const salt = createSalt();
-  const passwordHash = await hashPassword(input.password, salt);
-  await db.users.update(user.id, { salt, passwordHash });
+export async function resetPassword(email: string) {
+  const redirectTo =
+    typeof window === "undefined" ? undefined : `${window.location.origin}/login`;
+  const { error } = await getSupabase().auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+    redirectTo,
+  });
+  if (error) throw new Error(authError(error.message));
 }
 
-export function logoutUser() {
-  clearSession();
-}
-
-export function currentSession() {
-  return getSession();
+export async function logoutUser() {
+  await getSupabase().auth.signOut();
 }
 
 export async function getCurrentUser(): Promise<User | null> {
-  const session = getSession();
-  if (!session) return null;
-  return (await db.users.get(session.userId)) ?? null;
+  const { data, error } = await getSupabase().auth.getUser();
+  if (error || !data.user?.email) return null;
+  return profileFor(data.user.id, data.user.email, data.user.user_metadata?.name);
 }
 
 export async function updateUserProfile(
   userId: string,
   data: Partial<Pick<User, "name" | "preferences">>
 ) {
-  await db.users.update(userId, data);
-  const session = getSession();
-  if (session && data.name) {
-    setSession({ ...session, name: data.name });
-  }
+  const patch: Record<string, unknown> = {};
+  if (data.name) patch.name = data.name.trim();
+  if (data.preferences) patch.preferences = data.preferences;
+  const { error } = await getSupabase().from("profiles").update(toSnake(patch)).eq("id", userId);
+  if (error) throw new Error(error.message);
+  notifyDataChange();
 }
 
 export async function changePassword(
-  userId: string,
+  _userId: string,
   currentPassword: string,
   newPassword: string
 ) {
-  const user = await db.users.get(userId);
-  if (!user) throw new Error("Usuário não encontrado.");
+  const { data } = await getSupabase().auth.getUser();
+  const email = data.user?.email;
+  if (!email) throw new Error("Usuário não encontrado.");
 
-  const valid = await verifyPassword(
-    currentPassword,
-    user.salt,
-    user.passwordHash
-  );
-  if (!valid) throw new Error("Senha atual incorreta.");
+  const { error: signError } = await getSupabase().auth.signInWithPassword({
+    email,
+    password: currentPassword,
+  });
+  if (signError) throw new Error("Senha atual incorreta.");
 
-  const salt = createSalt();
-  const passwordHash = await hashPassword(newPassword, salt);
-  await db.users.update(userId, { salt, passwordHash });
+  const { error } = await getSupabase().auth.updateUser({ password: newPassword });
+  if (error) throw new Error(authError(error.message));
 }

@@ -183,3 +183,217 @@ body::before {
 .animate-fade-up {
   animation: fade-up 0.35s ease-out both;
 }
+
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hero-pill {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(22px, 28px, 0);
+  }
+}
+
+@keyframes pulse-dot {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes chart-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes chart-fill {
+  to {
+    opacity: 0.15;
+  }
+}
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  height: 2px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: var(--primary);
+  pointer-events: none;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(48px);
+}
+
+.orb-a {
+  top: -5rem;
+  left: -8rem;
+  height: 24rem;
+  width: 24rem;
+  background: color-mix(in oklab, var(--primary) 24%, transparent);
+}
+
+.orb-b {
+  top: 10rem;
+  right: -10rem;
+  height: 28rem;
+  width: 28rem;
+  background: color-mix(in oklab, #34d399 18%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-in {
+    animation: hero-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .hero-pill {
+    animation: hero-pill 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .orb {
+    animation: drift 16s ease-in-out infinite;
+  }
+
+  .orb-b {
+    animation-delay: -7s;
+  }
+
+  .pulse-dot {
+    animation: pulse-dot 2.6s ease-out infinite;
+  }
+
+  .float-card {
+    animation: float-y 8s ease-in-out infinite;
+  }
+
+  .lift {
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.35s ease,
+      box-shadow 0.35s ease;
+  }
+
+  .lift:hover {
+    transform: translateY(-4px);
+  }
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .reveal {
+    transition:
+      opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  .reveal:not([data-shown="true"]) {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  .reveal[data-variant="scale"]:not([data-shown="true"]) {
+    transform: translateY(22px) scale(0.97);
+  }
+
+  .reveal[data-variant="left"]:not([data-shown="true"]) {
+    transform: translateX(-28px);
+  }
+
+  .reveal[data-shown="true"] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .reveal:not([data-shown="true"]) .stagger-item,
+  .reveal:not([data-shown="true"]) .chart-fill {
+    opacity: 0;
+  }
+
+  .reveal:not([data-shown="true"]) .chart-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .reveal[data-shown="true"] .stagger-item {
+    animation: hero-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--stagger, 0ms);
+  }
+
+  .reveal[data-shown="true"] .chart-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: chart-draw 1.8s ease forwards 0.2s;
+  }
+
+  .reveal[data-shown="true"] .chart-fill {
+    animation: chart-fill 0.9s ease forwards 0.7s;
+  }
+}
+
+.faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease;
+}
+
+details[open] .faq-panel {
+  grid-template-rows: 1fr;
+}
+
+.faq-panel > p {
+  overflow: hidden;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .lift:hover,
+  .reveal.lift[data-shown="true"]:hover {
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-panel {
+    transition: none;
+  }
+}

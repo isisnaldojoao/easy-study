@@ -1,21 +1,18 @@
-"use client";
+import { LandingPage } from "@/components/landing/landing-page";
+import { JsonLd } from "@/components/seo/json-ld";
+import { homeJsonLd, HOME_DESCRIPTION, HOME_TITLE, pageMetadata } from "@/lib/seo";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-
-const SESSION_KEY = "studyflow.session";
+export const metadata = pageMetadata({
+  title: { absolute: HOME_TITLE },
+  description: HOME_DESCRIPTION,
+  path: "/",
+});
 
 export default function HomePage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const hasSession = Boolean(localStorage.getItem(SESSION_KEY));
-    router.replace(hasSession ? "/dashboard" : "/login");
-  }, [router]);
-
   return (
-    <div className="flex min-h-full flex-1 items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">Carregando...</p>
-    </div>
+    <>
+      <JsonLd data={homeJsonLd()} />
+      <LandingPage />
+    </>
   );
 }

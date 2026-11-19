@@ -3,6 +3,7 @@ import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import { SerwistProvider } from "@serwist/turbopack/react";
 import { AppProviders } from "@/providers/app-providers";
 import { APP_NAME } from "@/lib/constants";
+import { getSiteUrl, HOME_DESCRIPTION, HOME_TITLE } from "@/lib/seo";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -16,13 +17,40 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: {
-    default: APP_NAME,
+    default: HOME_TITLE,
     template: `%s · ${APP_NAME}`,
   },
-  description:
-    "Organize disciplinas, provas, revisões e sessões de estudo em um só lugar.",
+  description: HOME_DESCRIPTION,
   applicationName: APP_NAME,
+  authors: [{ name: APP_NAME, url: "/" }],
+  creator: APP_NAME,
+  category: "education",
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    siteName: APP_NAME,
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

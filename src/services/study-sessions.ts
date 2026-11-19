@@ -1,7 +1,8 @@
-import { nanoid } from "nanoid";
-import { db } from "@/lib/db";
 import { nowISO, sessionDurationHours } from "@/lib/dates";
+import { deleteOwned, getOwned, insertRow, listByUser, updateRow } from "@/lib/supabase-db";
 import type { SessionStatus, StudySession } from "@/types";
+
+const table = "study_sessions";
 
 export type StudySessionFields = {
   subjectId: string;
@@ -14,7 +15,7 @@ export type StudySessionFields = {
 };
 
 export async function listStudySessions(userId: string) {
-  const items = await db.studySessions.where("userId").equals(userId).toArray();
+  const items = await listByUser<StudySession>(table, userId);
   return items.sort((a, b) =>
     a.startDate === b.startDate
       ? a.startTime.localeCompare(b.startTime)
@@ -22,12 +23,9 @@ export async function listStudySessions(userId: string) {
   );
 }
 
-export async function createStudySession(
-  userId: string,
-  input: StudySessionFields
-) {
-  const session: StudySession = {
-    id: nanoid(),
+export async function createStudySession(userId: string, input: StudySessionFields) {
+  return insertRow<StudySession>(table, {
+    id: crypto.randomUUID(),
     userId,
     subjectId: input.subjectId,
     title: input.title.trim(),
@@ -39,22 +37,13 @@ export async function createStudySession(
     status: "pendente",
     createdAt: nowISO(),
     updatedAt: nowISO(),
-  };
-  await db.studySessions.add(session);
-  return session;
+  });
 }
 
-export async function updateStudySession(
-  id: string,
-  userId: string,
-  input: StudySessionFields
-) {
-  const existing = await db.studySessions.get(id);
-  if (!existing || existing.userId !== userId) {
-    throw new Error("Sessão não encontrada.");
-  }
-
-  await db.studySessions.update(id, {
+export async function updateStudySession(id: string, userId: string, input: StudySessionFields) {
+  const existing = await getOwned<StudySession>(table, id, userId);
+  if (!existing) throw new Error("Sessão não encontrada.");
+  return updateRow<StudySession>(table, id, userId, {
     subjectId: input.subjectId,
     title: input.title.trim(),
     content: input.content ?? "",
@@ -64,44 +53,34 @@ export async function updateStudySession(
     notes: input.notes ?? "",
     updatedAt: nowISO(),
   });
-  return db.studySessions.get(id);
 }
 
-export async function setStudySessionStatus(
-  id: string,
-  userId: string,
-  status: SessionStatus
-) {
-  const existing = await db.studySessions.get(id);
-  if (!existing || existing.userId !== userId) {
-    throw new Error("Sessão não encontrada.");
-  }
-  await db.studySessions.update(id, { status, updatedAt: nowISO() });
-  return db.studySessions.get(id);
+export async function setStudySessionStatus(id: string, userId: string, status: SessionStatus) {
+  const existing = await getOwned<StudySession>(table, id, userId);
+  if (!existing) throw new Error("Sessão não encontrada.");
+  return updateRow<StudySession>(table, id, userId, { status, updatedAt: nowISO() });
 }
 
 export async function deleteStudySession(id: string, userId: string) {
-  const existing = await db.studySessions.get(id);
-  if (!existing || existing.userId !== userId) {
-    throw new Error("Sessão não encontrada.");
-  }
-  await db.studySessions.delete(id);
+  const existing = await getOwned<StudySession>(table, id, userId);
+  if (!existing) throw new Error("Sessão não encontrada.");
+  await deleteOwned(table, id, userId);
 }
 
 export function computeSessionStats(sessions: StudySession[]) {
   const planned = sessions.reduce(
-    (acc, s) => acc + sessionDurationHours(s.startTime, s.endTime),
+    (acc, session) => acc + sessionDurationHours(session.startTime, session.endTime),
     0
   );
-  const doneSessions = sessions.filter((s) => s.status === "concluida");
+  const doneSessions = sessions.filter((session) => session.status === "concluida");
   const doneHours = doneSessions.reduce(
-    (acc, s) => acc + sessionDurationHours(s.startTime, s.endTime),
+    (acc, session) => acc + sessionDurationHours(session.startTime, session.endTime),
     0
   );
   return {
     plannedHours: Number(planned.toFixed(1)),
     doneHours: Number(doneHours.toFixed(1)),
     completed: doneSessions.length,
-    pending: sessions.filter((s) => s.status === "pendente").length,
+    pending: sessions.filter((session) => session.status === "pendente").length,
   };
 }

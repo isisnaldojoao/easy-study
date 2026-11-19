@@ -115,7 +115,7 @@ export default function MateriaisPage() {
             Materiais
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Arquivos salvos localmente no seu navegador
+            Arquivos da sua conta, disponíveis em qualquer aparelho
           </p>
         </div>
       </div>
@@ -124,7 +124,7 @@ export default function MateriaisPage() {
         <CardHeader>
           <CardTitle className="text-base">Enviar arquivo</CardTitle>
           <CardDescription>
-            PDF, DOCX, PPTX, imagens e TXT — armazenados no IndexedDB
+            PDF, DOCX, PPTX, imagens e TXT — salvos na sua conta
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-end">

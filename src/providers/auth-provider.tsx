@@ -8,6 +8,8 @@ import {
   useMemo,
   useState,
 } from "react";
+import { nowISO } from "@/lib/dates";
+import { getSupabase, supabaseConfigured } from "@/lib/supabase";
 import {
   changePassword,
   getCurrentUser,
@@ -19,9 +21,8 @@ import {
 } from "@/services/auth";
 import { refreshOverdueStatuses } from "@/services/activities";
 import { runNotificationEngine } from "@/services/notifications";
-import type { RegisterInput, ResetPasswordInput } from "@/schemas/auth";
+import type { RegisterInput } from "@/schemas/auth";
 import type { Session, User, UserPreferences } from "@/types";
-import { getSession } from "@/lib/session";
 
 interface AuthContextValue {
   user: User | null;
@@ -29,12 +30,10 @@ interface AuthContextValue {
   loading: boolean;
   refresh: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
-  register: (input: RegisterInput) => Promise<void>;
+  register: (input: RegisterInput) => Promise<"signed_in" | "confirm_email">;
   logout: () => void;
-  resetPassword: (input: ResetPasswordInput) => Promise<void>;
-  updateProfile: (
-    data: Partial<Pick<User, "name" | "preferences">>
-  ) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updateProfile: (data: Partial<Pick<User, "name" | "preferences">>) => Promise<void>;
   updatePassword: (current: string, next: string) => Promise<void>;
 }
 
@@ -46,15 +45,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    const current = getSession();
-    setSessionState(current);
-    if (!current) {
+    if (!supabaseConfigured) {
       setUser(null);
+      setSessionState(null);
       setLoading(false);
       return;
     }
+
+    const { data } = await getSupabase().auth.getSession();
+    const authUser = data.session?.user;
+    if (!authUser) {
+      setUser(null);
+      setSessionState(null);
+      setLoading(false);
+      return;
+    }
+
     const full = await getCurrentUser();
     setUser(full);
+    setSessionState(
+      full
+        ? {
+            userId: full.id,
+            email: full.email,
+            name: full.name,
+            loggedAt: nowISO(),
+          }
+        : null
+    );
     if (full) {
       await refreshOverdueStatuses(full.id);
       await runNotificationEngine(full.id);
@@ -64,6 +82,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     void refresh();
+    if (!supabaseConfigured) return;
+    const { data } = getSupabase().auth.onAuthStateChange(() => {
+      setTimeout(() => void refresh(), 0);
+    });
+    return () => data.subscription.unsubscribe();
   }, [refresh]);
 
   const value = useMemo<AuthContextValue>(
@@ -77,16 +100,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await refresh();
       },
       async register(input) {
-        await registerUser(input);
-        await refresh();
+        const result = await registerUser(input);
+        if (result.status === "signed_in") await refresh();
+        return result.status;
       },
       logout() {
-        logoutUser();
+        void logoutUser();
         setUser(null);
         setSessionState(null);
       },
-      async resetPassword(input) {
-        await resetPassword(input);
+      async resetPassword(email) {
+        await resetPassword(email);
       },
       async updateProfile(data) {
         if (!user) return;

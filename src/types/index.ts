@@ -118,7 +118,8 @@ export interface Material {
   fileType: string;
   mimeType: string;
   size: number;
-  blob: Blob;
+  storagePath?: string;
+  blob?: Blob;
   createdAt: string;
 }
 

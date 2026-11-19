@@ -149,7 +149,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
         <SidebarBrand collapsed={false} onNavigate={onMobileClose} showClose />
         <SidebarNav collapsed={false} onNavigate={onMobileClose} />
         <div className="border-t border-white/10 px-5 py-4 text-xs text-sidebar-muted">
-          Dados salvos localmente neste dispositivo.
+          Conta salva no Supabase.
         </div>
       </aside>
 
@@ -181,7 +181,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
           </button>
           {!collapsed && (
             <p className="px-3 pb-3 text-xs text-sidebar-muted">
-              Dados salvos localmente neste dispositivo.
+              Conta salva no Supabase.
             </p>
           )}
         </div>

@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { loginSchema, type LoginInput } from "@/schemas/auth";
+import { EMAIL_NOT_CONFIRMED_MESSAGE } from "@/services/auth";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +29,14 @@ export default function LoginPage() {
       toast.success("Bem-vindo de volta!");
       router.replace("/dashboard");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Falha no login");
+      const message = error instanceof Error ? error.message : "Falha no login";
+      if (message === EMAIL_NOT_CONFIRMED_MESSAGE) {
+        toast.message("Falta confirmar o e-mail", {
+          description: "Abra o link que enviamos e entre de novo.",
+        });
+        return;
+      }
+      toast.error(message);
     }
   });
 

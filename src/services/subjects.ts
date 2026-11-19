@@ -1,22 +1,23 @@
-import { nanoid } from "nanoid";
-import { db } from "@/lib/db";
 import { nowISO } from "@/lib/dates";
+import { deleteOwned, deleteWhere, getOwned, insertRow, listByUser, updateRow } from "@/lib/supabase-db";
+import { getSupabase } from "@/lib/supabase";
 import type { SubjectInput } from "@/schemas/subject";
 import type { Subject } from "@/types";
 
+const table = "subjects";
+
 export async function listSubjects(userId: string) {
-  return db.subjects.where("userId").equals(userId).sortBy("name");
+  const items = await listByUser<Subject>(table, userId);
+  return items.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function getSubject(id: string, userId: string) {
-  const subject = await db.subjects.get(id);
-  if (!subject || subject.userId !== userId) return null;
-  return subject;
+  return getOwned<Subject>(table, id, userId);
 }
 
 export async function createSubject(userId: string, input: SubjectInput) {
-  const subject: Subject = {
-    id: nanoid(),
+  return insertRow<Subject>(table, {
+    id: crypto.randomUUID(),
     userId,
     name: input.name.trim(),
     description: input.description ?? "",
@@ -24,71 +25,31 @@ export async function createSubject(userId: string, input: SubjectInput) {
     notes: input.notes ?? "",
     createdAt: nowISO(),
     updatedAt: nowISO(),
-  };
-  await db.subjects.add(subject);
-  return subject;
+  });
 }
 
-export async function updateSubject(
-  id: string,
-  userId: string,
-  input: SubjectInput
-) {
-  const existing = await getSubject(id, userId);
-  if (!existing) throw new Error("Disciplina não encontrada.");
-
-  await db.subjects.update(id, {
+export async function updateSubject(id: string, userId: string, input: SubjectInput) {
+  return updateRow<Subject>(table, id, userId, {
     name: input.name.trim(),
     description: input.description ?? "",
     color: input.color,
     notes: input.notes ?? "",
     updatedAt: nowISO(),
   });
-  return getSubject(id, userId);
 }
 
 export async function deleteSubject(id: string, userId: string) {
   const existing = await getSubject(id, userId);
   if (!existing) throw new Error("Disciplina não encontrada.");
 
-  await db.transaction(
-    "rw",
-    [
-      db.subjects,
-      db.activities,
-      db.studySessions,
-      db.reviewContents,
-      db.flashcards,
-      db.materials,
-      db.notifications,
-    ],
-    async () => {
-      const activityIds = (
-        await db.activities.where({ userId, subjectId: id }).toArray()
-      ).map((a) => a.id);
+  const materials = await listByUser<{ subjectId: string; storagePath?: string }>("materials", userId);
+  const paths = materials
+    .filter((item) => item.subjectId === id)
+    .map((item) => item.storagePath)
+    .filter((path): path is string => Boolean(path));
+  if (paths.length) {
+    await getSupabase().storage.from("materials").remove(paths);
+  }
 
-      await db.activities.where({ userId, subjectId: id }).delete();
-      await db.studySessions.where({ userId, subjectId: id }).delete();
-      await db.reviewContents.where({ userId, subjectId: id }).delete();
-      await db.flashcards.where({ userId, subjectId: id }).delete();
-      await db.materials.where({ userId, subjectId: id }).delete();
-
-      if (activityIds.length) {
-        const notifications = await db.notifications
-          .where("userId")
-          .equals(userId)
-          .toArray();
-        const toDelete = notifications
-          .filter(
-            (n) =>
-              n.relatedActivityId &&
-              activityIds.includes(n.relatedActivityId)
-          )
-          .map((n) => n.id);
-        await db.notifications.bulkDelete(toDelete);
-      }
-
-      await db.subjects.delete(id);
-    }
-  );
+  await deleteWhere("subjects", { id, user_id: userId });
 }

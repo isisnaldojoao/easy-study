@@ -1,112 +1,86 @@
 "use client";
 
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/db";
+import { useEffect, useState } from "react";
+import { onDataChange } from "@/lib/data-sync";
 import { useAuth } from "@/providers/auth-provider";
+import { listActivities } from "@/services/activities";
+import { listMaterials } from "@/services/materials";
+import { listNotifications } from "@/services/notifications";
+import { listFlashcards, listReviewContents } from "@/services/review";
+import { listStudySessions } from "@/services/study-sessions";
+import { listSubjects } from "@/services/subjects";
+
+function useRemote<T>(load: () => Promise<T>, initial: T, deps: unknown[]) {
+  const [data, setData] = useState<T>(initial);
+
+  useEffect(() => {
+    let active = true;
+    async function run() {
+      try {
+        const next = await load();
+        if (active) setData(next);
+      } catch {
+        if (active) setData(initial);
+      }
+    }
+    void run();
+    const unsubscribe = onDataChange(() => {
+      void run();
+    });
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+    // The loader closes over the latest user and filters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+
+  return data;
+}
 
 export function useSubjects() {
   const { user } = useAuth();
-  return useLiveQuery(
-    () => (user ? db.subjects.where("userId").equals(user.id).sortBy("name") : []),
-    [user?.id],
-    []
-  );
+  return useRemote(() => (user ? listSubjects(user.id) : Promise.resolve([])), [], [user?.id]);
 }
 
 export function useActivities() {
   const { user } = useAuth();
-  return useLiveQuery(
-    async () => {
-      if (!user) return [];
-      const items = await db.activities.where("userId").equals(user.id).toArray();
-      return items.sort((a, b) =>
-        a.date === b.date
-          ? (a.time ?? "").localeCompare(b.time ?? "")
-          : a.date.localeCompare(b.date)
-      );
-    },
-    [user?.id],
-    []
-  );
+  return useRemote(() => (user ? listActivities(user.id) : Promise.resolve([])), [], [user?.id]);
 }
 
 export function useStudySessions() {
   const { user } = useAuth();
-  return useLiveQuery(
-    async () => {
-      if (!user) return [];
-      const items = await db.studySessions
-        .where("userId")
-        .equals(user.id)
-        .toArray();
-      return items.sort((a, b) =>
-        a.startDate === b.startDate
-          ? a.startTime.localeCompare(b.startTime)
-          : a.startDate.localeCompare(b.startDate)
-      );
-    },
-    [user?.id],
-    []
-  );
+  return useRemote(() => (user ? listStudySessions(user.id) : Promise.resolve([])), [], [user?.id]);
 }
 
 export function useNotifications() {
   const { user } = useAuth();
-  return useLiveQuery(
-    async () => {
-      if (!user) return [];
-      const items = await db.notifications
-        .where("userId")
-        .equals(user.id)
-        .toArray();
-      return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-    },
-    [user?.id],
-    []
-  );
+  return useRemote(() => (user ? listNotifications(user.id) : Promise.resolve([])), [], [user?.id]);
 }
 
 export function useReviewContents(subjectId?: string) {
   const { user } = useAuth();
-  return useLiveQuery(
-    async () => {
-      if (!user) return [];
-      let items = await db.reviewContents
-        .where("userId")
-        .equals(user.id)
-        .toArray();
-      if (subjectId) items = items.filter((i) => i.subjectId === subjectId);
-      return items.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-    },
-    [user?.id, subjectId],
-    []
+  return useRemote(
+    () => (user ? listReviewContents(user.id, subjectId) : Promise.resolve([])),
+    [],
+    [user?.id, subjectId]
   );
 }
 
 export function useFlashcards(subjectId?: string) {
   const { user } = useAuth();
-  return useLiveQuery(
-    async () => {
-      if (!user) return [];
-      let items = await db.flashcards.where("userId").equals(user.id).toArray();
-      if (subjectId) items = items.filter((i) => i.subjectId === subjectId);
-      return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-    },
-    [user?.id, subjectId],
-    []
+  return useRemote(
+    () => (user ? listFlashcards(user.id, subjectId) : Promise.resolve([])),
+    [],
+    [user?.id, subjectId]
   );
 }
 
 export function useMaterials(subjectId?: string) {
   const { user } = useAuth();
-  return useLiveQuery(
-    async () => {
-      if (!user) return [];
-      let items = await db.materials.where("userId").equals(user.id).toArray();
-      if (subjectId) items = items.filter((i) => i.subjectId === subjectId);
-      return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-    },
-    [user?.id, subjectId],
-    []
+  return useRemote(
+    () => (user ? listMaterials(user.id, subjectId) : Promise.resolve([])),
+    [],
+    [user?.id, subjectId]
   );
 }

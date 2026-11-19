@@ -18,7 +18,7 @@ import { formatLongDate, todayISO } from "@/lib/dates";
 import { initials } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { useNotifications } from "@/hooks/use-live-data";
-import { db } from "@/lib/db";
+import { getActivity } from "@/services/activities";
 import {
   markAllNotificationsRead,
   markNotificationRead,
@@ -156,9 +156,10 @@ export function Header({ onMenuClick, search, onSearchChange }: HeaderProps) {
                               if (user && !n.read) {
                                 await markNotificationRead(n.id, user.id);
                               }
-                              if (n.relatedActivityId) {
-                                const activity = await db.activities.get(
-                                  n.relatedActivityId
+                              if (user && n.relatedActivityId) {
+                                const activity = await getActivity(
+                                  n.relatedActivityId,
+                                  user.id
                                 );
                                 if (activity?.subjectId) {
                                   router.push(
@@ -171,7 +172,7 @@ export function Header({ onMenuClick, search, onSearchChange }: HeaderProps) {
                                 router.push("/planejamento");
                               }
                             } catch {
-                              // evita quebrar o menu se o IndexedDB falhar
+                              // evita quebrar o menu se a consulta falhar
                             }
                           })();
                         }}

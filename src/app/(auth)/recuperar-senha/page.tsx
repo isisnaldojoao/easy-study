@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { resetPasswordSchema, type ResetPasswordInput } from "@/schemas/auth";
+import { forgotPasswordSchema, type ForgotPasswordInput } from "@/schemas/auth";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,14 +18,14 @@ export default function RecuperarSenhaPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<ResetPasswordInput>({
-    resolver: zodResolver(resetPasswordSchema),
+  } = useForm<ForgotPasswordInput>({
+    resolver: zodResolver(forgotPasswordSchema),
   });
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await resetPassword(data);
-      toast.success("Senha redefinida com sucesso!");
+      await resetPassword(data.email);
+      toast.success("Enviamos o link para redefinir a senha.");
       router.push("/login");
     } catch (error) {
       toast.error(
@@ -41,8 +41,8 @@ export default function RecuperarSenhaPage() {
       <div>
         <h2 className="text-xl font-semibold">Recuperar senha</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Como os dados são locais, informe o e-mail da conta e defina uma nova
-          senha.
+          Informe o e-mail da conta. O Supabase manda um link para você criar uma
+          senha nova.
         </p>
       </div>
 
@@ -54,28 +54,8 @@ export default function RecuperarSenhaPage() {
             <p className="text-xs text-destructive">{errors.email.message}</p>
           )}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Nova senha</Label>
-          <Input id="password" type="password" {...register("password")} />
-          {errors.password && (
-            <p className="text-xs text-destructive">{errors.password.message}</p>
-          )}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirmar nova senha</Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            {...register("confirmPassword")}
-          />
-          {errors.confirmPassword && (
-            <p className="text-xs text-destructive">
-              {errors.confirmPassword.message}
-            </p>
-          )}
-        </div>
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Redefinindo..." : "Redefinir senha"}
+          {isSubmitting ? "Enviando..." : "Enviar link"}
         </Button>
       </form>
 

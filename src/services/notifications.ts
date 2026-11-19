@@ -1,74 +1,80 @@
-import { nanoid } from "nanoid";
-import {
-  ACTIVITY_TYPES,
-  REMINDER_OPTIONS,
-} from "@/lib/constants";
-import { db } from "@/lib/db";
+import { ACTIVITY_TYPES, REMINDER_OPTIONS } from "@/lib/constants";
 import { addDaysISO, nowISO, todayISO } from "@/lib/dates";
-import type { Activity, AppNotification, ReminderOffset } from "@/types";
+import { toCamel, toSnake } from "@/lib/records";
+import { notifyDataChange } from "@/lib/data-sync";
+import { deleteOwned, listByUser, updateRow } from "@/lib/supabase-db";
+import { getSupabase } from "@/lib/supabase";
 import { getCurrentUser } from "@/services/auth";
+import type { Activity, AppNotification, ReminderOffset } from "@/types";
 
 function typeLabel(type: Activity["type"]) {
-  return ACTIVITY_TYPES.find((t) => t.value === type)?.label ?? type;
+  return ACTIVITY_TYPES.find((item) => item.value === type)?.label ?? type;
 }
 
 function reminderLabel(offset: ReminderOffset) {
-  return (
-    REMINDER_OPTIONS.find((r) => r.value === offset)?.label ??
-    `${offset} dias antes`
-  );
+  return REMINDER_OPTIONS.find((item) => item.value === offset)?.label ?? `${offset} dias antes`;
 }
 
 export async function listNotifications(userId: string) {
-  const items = await db.notifications.where("userId").equals(userId).toArray();
+  const items = await listByUser<AppNotification>("notifications", userId);
   return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export async function unreadCount(userId: string) {
-  const items = await db.notifications.where("userId").equals(userId).toArray();
-  return items.filter((n) => !n.read).length;
+  const items = await listNotifications(userId);
+  return items.filter((item) => !item.read).length;
 }
 
 export async function markNotificationRead(id: string, userId: string) {
-  const item = await db.notifications.get(id);
-  if (!item || item.userId !== userId) return;
-  await db.notifications.update(id, { read: true });
+  await updateRow("notifications", id, userId, { read: true });
 }
 
 export async function markAllNotificationsRead(userId: string) {
-  const items = await db.notifications.where("userId").equals(userId).toArray();
-  await db.notifications.bulkPut(items.map((n) => ({ ...n, read: true })));
+  const { error } = await getSupabase()
+    .from("notifications")
+    .update({ read: true })
+    .eq("user_id", userId)
+    .eq("read", false);
+  if (error) throw new Error(error.message);
+  notifyDataChange();
+}
+
+async function findByDedupe(userId: string, dedupeKey: string) {
+  const { data, error } = await getSupabase()
+    .from("notifications")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("dedupe_key", dedupeKey)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) return null;
+  return toCamel<AppNotification>(data as Record<string, unknown>);
 }
 
 async function upsertNotification(
-  notification: Omit<AppNotification, "id" | "createdAt"> & {
-    createdAt?: string;
-  }
+  notification: Omit<AppNotification, "id" | "createdAt"> & { createdAt?: string }
 ) {
-  const existing = await db.notifications
-    .where("dedupeKey")
-    .equals(notification.dedupeKey)
-    .first();
-
+  const existing = await findByDedupe(notification.userId, notification.dedupeKey);
   if (existing) {
-    if (existing.userId !== notification.userId) return existing;
-    await db.notifications.update(existing.id, {
+    await updateRow("notifications", existing.id, notification.userId, {
       title: notification.title,
       message: notification.message,
       type: notification.type,
       scheduledAt: notification.scheduledAt,
-      relatedActivityId: notification.relatedActivityId,
-      relatedSessionId: notification.relatedSessionId,
+      relatedActivityId: notification.relatedActivityId ?? null,
+      relatedSessionId: notification.relatedSessionId ?? null,
     });
     return existing;
   }
 
-  const created: AppNotification = {
-    id: nanoid(),
+  const created = {
+    id: crypto.randomUUID(),
     createdAt: nowISO(),
     ...notification,
   };
-  await db.notifications.add(created);
+  const { error } = await getSupabase().from("notifications").insert(toSnake(created));
+  if (error) throw new Error(error.message);
+  notifyDataChange();
   return created;
 }
 
@@ -78,13 +84,9 @@ export async function syncActivityNotifications(activity: Activity) {
   if (!user.preferences.notificationsEnabled) return;
 
   const today = todayISO();
-  const existing = await db.notifications
-    .where("userId")
-    .equals(activity.userId)
-    .filter((n) => n.relatedActivityId === activity.id)
-    .toArray();
-
-  // Remove stale unread reminder/upcoming keys that no longer apply
+  const existing = (await listNotifications(activity.userId)).filter(
+    (item) => item.relatedActivityId === activity.id
+  );
   const keepKeys = new Set<string>();
 
   if (activity.status === "concluido") {
@@ -114,10 +116,9 @@ export async function syncActivityNotifications(activity: Activity) {
       dedupeKey,
     });
   } else {
-    for (const offset of activity.reminderSettings) {
+    for (const offset of activity.reminderSettings ?? []) {
       const scheduledAt = addDaysISO(activity.date, -offset);
       if (scheduledAt > today) continue;
-
       const dedupeKey = `reminder:${activity.id}:${offset}`;
       keepKeys.add(dedupeKey);
       await upsertNotification({
@@ -139,10 +140,8 @@ export async function syncActivityNotifications(activity: Activity) {
       });
     }
 
-    const daysAhead = ["3", "7"] as const;
-    for (const days of daysAhead) {
-      const target = addDaysISO(today, Number(days));
-      if (activity.date !== target) continue;
+    for (const days of ["3", "7"] as const) {
+      if (activity.date !== addDaysISO(today, Number(days))) continue;
       const dedupeKey = `upcoming:${activity.id}:${days}`;
       keepKeys.add(dedupeKey);
       await upsertNotification({
@@ -159,30 +158,26 @@ export async function syncActivityNotifications(activity: Activity) {
   }
 
   const stale = existing.filter(
-    (n) =>
-      !keepKeys.has(n.dedupeKey) &&
-      (n.type === "reminder" || n.type === "upcoming" || n.type === "overdue")
+    (item) =>
+      !keepKeys.has(item.dedupeKey) &&
+      (item.type === "reminder" || item.type === "upcoming" || item.type === "overdue")
   );
-  if (stale.length) {
-    await db.notifications.bulkDelete(stale.map((n) => n.id));
+  for (const item of stale) {
+    await deleteOwned("notifications", item.id, activity.userId);
   }
 }
 
-/** Run reminder generation for all user activities (local "backend" routine). */
 export async function runNotificationEngine(userId: string) {
-  const user = await db.users.get(userId);
-  if (!user?.preferences.notificationsEnabled) return;
-
-  const activities = await db.activities.where("userId").equals(userId).toArray();
+  const user = await getCurrentUser();
+  if (!user || user.id !== userId || !user.preferences.notificationsEnabled) return;
+  const activities = await listByUser<Activity>("activities", userId);
   for (const activity of activities) {
     await syncActivityNotifications(activity);
   }
 }
 
 export async function requestBrowserPushPermission() {
-  if (typeof window === "undefined" || !("Notification" in window)) {
-    return false;
-  }
+  if (typeof window === "undefined" || !("Notification" in window)) return false;
   const result = await Notification.requestPermission();
   return result === "granted";
 }

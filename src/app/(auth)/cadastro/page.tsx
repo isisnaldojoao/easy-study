@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Mail } from "lucide-react";
 import { toast } from "sonner";
 import { registerSchema, type RegisterInput } from "@/schemas/auth";
 import { useAuth } from "@/providers/auth-provider";
@@ -14,6 +16,7 @@ import { Label } from "@/components/ui/label";
 export default function CadastroPage() {
   const router = useRouter();
   const { register: registerAccount } = useAuth();
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -24,7 +27,14 @@ export default function CadastroPage() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await registerAccount(data);
+      const status = await registerAccount(data);
+      if (status === "confirm_email") {
+        setPendingEmail(data.email.trim().toLowerCase());
+        toast.success("Conta criada", {
+          description: "Falta abrir o link que enviamos para o seu e-mail.",
+        });
+        return;
+      }
       toast.success("Conta criada com sucesso!");
       router.replace("/dashboard");
     } catch (error) {
@@ -33,6 +43,37 @@ export default function CadastroPage() {
       );
     }
   });
+
+  if (pendingEmail) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-start gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Mail className="size-5" />
+          </span>
+          <div>
+            <p className="text-xs font-medium tracking-wide text-primary uppercase">
+              Conta criada
+            </p>
+            <h2 className="mt-1 text-xl font-semibold">Confirme seu e-mail</h2>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Enviamos um link para{" "}
+          <span className="font-medium text-foreground">{pendingEmail}</span>. A
+          conta só entra depois dessa confirmação.
+        </p>
+        <ol className="space-y-2 text-sm text-muted-foreground">
+          <li>1. Abra a caixa de entrada. Se não aparecer, olhe o spam.</li>
+          <li>2. Clique no link de confirmação.</li>
+          <li>3. Volte e entre com o mesmo e-mail e senha.</li>
+        </ol>
+        <Button asChild className="w-full">
+          <Link href="/login">Ir para o login</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
