@@ -13,7 +13,7 @@ export function OgCard({ title, subtitle }: { title: string; subtitle: string })
       }}
     >
       <div style={{ display: "flex", fontSize: 28, color: "#2dd4bf", fontWeight: 700 }}>
-        Easy Study
+        Study Flow
       </div>
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div

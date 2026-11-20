@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 
-const STORAGE_KEY = "easystudy.sidebarCollapsed";
+const STORAGE_KEY = "studyflow.sidebarCollapsed";
 
 interface SidebarPreferenceValue {
   collapsed: boolean;

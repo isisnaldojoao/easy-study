@@ -5,7 +5,7 @@ import type {
   ReminderOffset,
 } from "@/types";
 
-export const APP_NAME = "Easy Study";
+export const APP_NAME = "Study Flow";
 
 export const SUBJECT_COLORS = [
   "#2563EB",

@@ -16,7 +16,7 @@ export function AppLogo({
       style={{ width: size, height: size, fontSize: Math.max(11, size * 0.32) }}
       aria-hidden
     >
-      ES
+      SF
     </span>
   );
 }

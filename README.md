@@ -1,4 +1,4 @@
-# Easy Study
+# Study Flow
 
 Plataforma local de organização acadêmica — disciplinas, atividades, calendário, planejamento, revisão, materiais e relatórios.
 

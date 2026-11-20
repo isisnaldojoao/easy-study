@@ -10,7 +10,7 @@ import type {
   User,
 } from "@/types";
 
-class EasyStudyDB extends Dexie {
+class StudyFlowDB extends Dexie {
   users!: EntityTable<User, "id">;
   subjects!: EntityTable<Subject, "id">;
   activities!: EntityTable<Activity, "id">;
@@ -36,4 +36,4 @@ class EasyStudyDB extends Dexie {
   }
 }
 
-export const db = new EasyStudyDB();
+export const db = new StudyFlowDB();

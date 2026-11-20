@@ -15,8 +15,8 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
-    slug: "como-o-easy-study-funciona",
-    title: "Como o Easy Study funciona",
+    slug: "como-o-study-flow-funciona",
+    title: "Como o Study Flow funciona",
     description:
       "O mapa do semestre: conta, disciplinas, prazos, sessões, revisão e o que aparece quando você abre o início.",
     published: "2026-11-17",
@@ -25,7 +25,7 @@ export const BLOG_POSTS: BlogPost[] = [
     blocks: [
       {
         type: "p",
-        text: "O Easy Study guarda a rotina acadêmica num painel só. Você cria a conta, cadastra as disciplinas e passa a ver o que vence, o que estudar e o que já foi feito.",
+        text: "O Study Flow guarda a rotina acadêmica num painel só. Você cria a conta, cadastra as disciplinas e passa a ver o que vence, o que estudar e o que já foi feito.",
       },
       {
         type: "p",
@@ -281,7 +281,7 @@ export const BLOG_POSTS: BlogPost[] = [
     blocks: [
       {
         type: "p",
-        text: "A conta do Easy Study fica no Supabase. Disciplinas, prazos, sessões, revisões, flashcards e arquivos acompanham o login. A senha fica no serviço de autenticação, não no texto da anotação. Cada pessoa só lê o que o próprio login criou.",
+        text: "A conta do Study Flow fica no Supabase. Disciplinas, prazos, sessões, revisões, flashcards e arquivos acompanham o login. A senha fica no serviço de autenticação, não no texto da anotação. Cada pessoa só lê o que o próprio login criou.",
       },
       {
         type: "h2",

@@ -4,7 +4,7 @@ import { APP_NAME } from "@/lib/constants";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: APP_NAME,
-    short_name: "Easy Study",
+    short_name: APP_NAME,
     description:
       "Organize disciplinas, provas, revisões e sessões de estudo em um só lugar.",
     start_url: "/dashboard",

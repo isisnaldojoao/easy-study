@@ -156,7 +156,7 @@ export function LandingPage() {
             >
               trabalho na segunda
             </span>
-            . O Easy Study te mostra{" "}
+            . O Study Flow te mostra{" "}
             <span
               className="hero-pill inline-block rounded-full bg-primary px-2.5 py-0.5 align-baseline text-[0.86em] text-primary-foreground"
               style={{ animationDelay: "520ms" }}
@@ -220,7 +220,7 @@ export function LandingPage() {
             </h2>
             <p className="mt-3 text-muted-foreground">
               Grupo da turma, bloco de notas, calendário do celular e uma planilha que ninguém
-              atualiza. O Easy Study junta a rotina acadêmica num fluxo só.
+              atualiza. O Study Flow junta a rotina acadêmica num fluxo só.
             </p>
           </Reveal>
 
@@ -458,7 +458,7 @@ function ProductPreview() {
         <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-5">
           <div className="flex min-w-0 items-center gap-2">
             <AppLogo size={28} />
-            <span className="truncate text-sm font-medium">Easy Study</span>
+            <span className="truncate text-sm font-medium">Study Flow</span>
           </div>
           <div className="hidden items-center gap-4 text-xs text-sidebar-muted md:flex">
             <span className="text-sidebar-foreground">Início</span>
@@ -559,7 +559,7 @@ function ProductPreview() {
         </div>
       </div>
       <figcaption className="sr-only">
-        Prévia ilustrada do painel do Easy Study, com dados de exemplo.
+        Prévia ilustrada do painel do Study Flow, com dados de exemplo.
       </figcaption>
     </figure>
   );

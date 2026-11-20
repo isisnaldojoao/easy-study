@@ -1,6 +1,6 @@
 {
-  "name": "easy-study",
-  "description": "Easy Study — organização acadêmica",
+  "name": "study-flow",
+  "description": "Study Flow — organização acadêmica",
   "version": "0.1.0",
   "private": true,
   "scripts": {

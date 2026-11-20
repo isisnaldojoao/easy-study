@@ -13,7 +13,7 @@ async function make(size, out) {
   <rect width="${size}" height="${size}" rx="${r}" fill="url(#g)"/>
   <text x="50%" y="54%" text-anchor="middle" dominant-baseline="middle"
     font-family="Arial, Helvetica, sans-serif" font-weight="700"
-    font-size="${font}" fill="white">ES</text>
+    font-size="${font}" fill="white">SF</text>
 </svg>`);
   await sharp(svg).png().toFile(out);
 }
@@ -25,4 +25,4 @@ await make(32, "public/favicon-32.png");
 await make(192, "src/app/icon.png");
 await make(180, "src/app/apple-icon.png");
 await make(512, "public/logo.png");
-console.log("es-icons-ok");
+console.log("sf-icons-ok");

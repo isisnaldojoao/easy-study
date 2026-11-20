@@ -1,4 +1,4 @@
--- Easy Study: rode este arquivo no SQL Editor do Supabase.
+-- Study Flow: rode este arquivo no SQL Editor do Supabase.
 -- Em Authentication > Providers > Email, desligue "Confirm email"
 -- se quiser entrar logo depois do cadastro, sem abrir o link.
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { APP_NAME } from "@/lib/constants";
 import { BLOG_POSTS, type BlogPost } from "@/lib/blog";
 
-export const HOME_TITLE = "Easy Study — organize provas e prazos de graça";
+export const HOME_TITLE = "Study Flow — organize provas e prazos de graça";
 
 export const HOME_DESCRIPTION =
   "Organize disciplinas, provas, revisões e horas de estudo num painel só. De graça, com a conta na nuvem, sem mensalidade. Crie a conta e veja o que estudar hoje.";
@@ -10,7 +10,7 @@ export const HOME_DESCRIPTION =
 export const BLOG_TITLE = "Guias para organizar o semestre";
 
 export const BLOG_DESCRIPTION =
-  "Como o Easy Study funciona de verdade: disciplinas, prazos, calendário, revisão, materiais e onde os dados ficam. Leia e crie a conta grátis.";
+  "Como o Study Flow funciona de verdade: disciplinas, prazos, calendário, revisão, materiais e onde os dados ficam. Leia e crie a conta grátis.";
 
 export const FAQS = [
   {
